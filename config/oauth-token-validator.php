@@ -18,5 +18,9 @@ return [
 
     'cache_keys' => [
         'jwks_signature_public_key' => env('OAUTH2_JWKS_PUBLIC_KEY_CACHE_NAME', 'oauth.signature_key')
+    ],
+    'endpoints'  => [
+        'token'         => env('OAUTH2_REQUEST_TOKEN_ENDPOINT'),
+        'user_infos'    => env('OAUTH2_REQUEST_USER_INFOS_ENDPOINT'),
     ]
 ];
