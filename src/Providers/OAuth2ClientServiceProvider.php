@@ -28,7 +28,7 @@ class OAuth2ClientServiceProvider extends ServiceProvider
         // Normally, the CacheServiceProvider is marked as 'deferred' which means it's not loaded before
         // the OAuth2ClientServiceProvider service provider needs it. To fix it, we need to register it manually.
         // This package relies on cache, which relies on the Cache Store that's how the Store becomes available.
-        $this->app->register(CacheServiceProvider::class);
+//        $this->app->register(CacheServiceProvider::class);
 
         // The same is required for hashing.
         $this->app->register(HashServiceProvider::class);
