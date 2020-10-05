@@ -97,7 +97,8 @@ class OAuth2Controller extends BaseController
      */
     public function issueToken(Request $request): JsonResponse
     {
-        $response = $this->guzzleClient->post($this->config->get('oauth-token-validator.oauth2_server_url') . $this->config->get('oauth-token-validator.endpoints.token'), [
+        $tokenLink = $this->config->get('oauth-token-validator.oauth2_server_url') . $this->config->get('oauth-token-validator.endpoints.token');
+        $payLoad   = [
             'form_params' => [
                 'grant_type'    => 'authorization_code',
                 'client_id'     => $this->config->get('oauth-token-validator.client_id'),
@@ -105,10 +106,10 @@ class OAuth2Controller extends BaseController
                 'redirect_uri'  => $this->config->get('oauth-token-validator.client_redirect_url'),
                 'code'          => $request->get('code'),
             ],
-        ]);
+        ];
+        $response  = $this->guzzleClient->post($tokenLink, $payLoad);
 
         $tokenResponseData = json_decode((string) $response->getBody());
-
         if ($response->getStatusCode() !== 200) {
             return new JsonResponse([
                 'code' => $response->getStatusCode(),
@@ -117,15 +118,14 @@ class OAuth2Controller extends BaseController
         }
 
         // Pull the user data from the IDProvider server (oAuth2)
-        $response = $this->guzzleClient->get(
-            $this->config->get('oauth-token-validator.oauth2_server_url') . $this->config->get('oauth-token-validator.endpoints.user_infos'),
-            [
-                'headers' => [
-                    'Accept'        => 'application/json',
-                    'Authorization' => 'Bearer '. $tokenResponseData->access_token,
-                ],
-            ]
-        );
+        $userInfoLink = $this->config->get('oauth-token-validator.oauth2_server_url') . $this->config->get('oauth-token-validator.endpoints.user_infos');
+        $payLoad      = [
+            'headers' => [
+                'Accept'        => 'application/json',
+                'Authorization' => 'Bearer '. $tokenResponseData->access_token,
+            ],
+        ];
+        $response     = $this->guzzleClient->get($userInfoLink,$payLoad);
 
         $userResponseData = json_decode((string) $response->getBody());
 
@@ -196,17 +196,16 @@ class OAuth2Controller extends BaseController
         }
 
         // Send a rquest to the ID Provider to obtain a new set of tokens
-        $response = $this->guzzleClient->post(
-            $this->config->get('oauth-token-validator.oauth2_server_url') . $this->config->get('oauth-token-validator.endpoints.token'),
-            [
-                'form_params' => [
-                    'grant_type'    => 'refresh_token',
-                    'refresh_token' => $refreshTokenRow->refreshToken,
-                    'client_id'     => $this->config->get('oauth-token-validator.client_id'),
-                    'client_secret' => $this->config->get('oauth-token-validator.client_secret'),
-                ],
-            ]
-        );
+        $tokenUrl = $this->config->get('oauth-token-validator.oauth2_server_url') . $this->config->get('oauth-token-validator.endpoints.token');
+        $payLoad  = [
+            'form_params' => [
+                'grant_type'    => 'refresh_token',
+                'refresh_token' => $refreshTokenRow->refreshToken,
+                'client_id'     => $this->config->get('oauth-token-validator.client_id'),
+                'client_secret' => $this->config->get('oauth-token-validator.client_secret'),
+            ],
+        ];
+        $response = $this->guzzleClient->post($tokenUrl,$payLoad);
 
         $tokenResponseData = json_decode((string) $response->getBody());
 
