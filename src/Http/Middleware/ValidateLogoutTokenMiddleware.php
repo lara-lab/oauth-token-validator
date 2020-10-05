@@ -125,11 +125,11 @@ class ValidateLogoutTokenMiddleware
         }
 
         // Check if the token signature is valid
-        $signatureKey = $this->cache->get($this->config->get('oauth2client.cache_keys.jwks_signature_public_key'));
+        $signatureKey = $this->cache->get($this->config->get('oauth-token-validator.cache_keys.jwks_signature_public_key'));
         if ($signatureKey === null) {
             // Pull the Auth server public key which can be used for validation
             $response = $this->guzzleClient->get(
-                $this->config->get('oauth2client.oauth2_server_url') . '/api/v1/.well-known/jwks.json',
+                $this->config->get('oauth-token-validator.oauth2_server_url') . '/api/v1/.well-known/jwks.json',
                 [
                     'headers' => [
                         'Accept' => 'application/json',
@@ -163,7 +163,7 @@ class ValidateLogoutTokenMiddleware
 
             // Store the key in the cache for an hour
             $this->cache->put(
-                $this->config->get('oauth2client.cache_keys.jwks_signature_public_key'),
+                $this->config->get('oauth-token-validator.cache_keys.jwks_signature_public_key'),
                 $signatureKey,
                 Carbon::now()->addMinutes(60)
             );
@@ -207,12 +207,12 @@ class ValidateLogoutTokenMiddleware
         }
 
         // Check if the 'aud' matches the server configured client
-        if ($token->getClaim('aud') !== $this->config->get('oauth2client.client_id')) {
+        if ($token->getClaim('aud') !== $this->config->get('oauth-token-validator.client_id')) {
             throw new InvalidTokenException('The token aud claim doesnt match the required audience.', 401);
         }
 
         // Check if the token was issued by the right IDProvider
-        if ($token->getClaim('iss') !== $this->config->get('oauth2client.oauth2_server_url')) {
+        if ($token->getClaim('iss') !== $this->config->get('oauth-token-validator.oauth2_server_url')) {
             throw new InvalidTokenException('The token iss claim doesnt match the required issuer.', 401);
         }
 

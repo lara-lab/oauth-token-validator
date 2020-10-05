@@ -97,12 +97,12 @@ class OAuth2Controller extends BaseController
      */
     public function issueToken(Request $request): JsonResponse
     {
-        $response = $this->guzzleClient->post($this->config->get('oauth2client.oauth2_server_url') . '/oauth/token', [
+        $response = $this->guzzleClient->post($this->config->get('oauth-token-validator.oauth2_server_url') . '/oauth/token', [
             'form_params' => [
                 'grant_type'    => 'authorization_code',
-                'client_id'     => $this->config->get('oauth2client.client_id'),
-                'client_secret' => $this->config->get('oauth2client.client_secret'),
-                'redirect_uri'  => $this->config->get('oauth2client.client_redirect_url'),
+                'client_id'     => $this->config->get('oauth-token-validator.client_id'),
+                'client_secret' => $this->config->get('oauth-token-validator.client_secret'),
+                'redirect_uri'  => $this->config->get('oauth-token-validator.client_redirect_url'),
                 'code'          => $request->get('code'),
             ],
         ]);
@@ -118,7 +118,7 @@ class OAuth2Controller extends BaseController
 
         // Pull the user data from the IDProvider server (oAuth2)
         $response = $this->guzzleClient->get(
-            $this->config->get('oauth2client.oauth2_server_url') . '/api/v1/users/me',
+            $this->config->get('oauth-token-validator.oauth2_server_url') . '/api/v1/users/me',
             [
                 'headers' => [
                     'Accept'        => 'application/json',
@@ -197,13 +197,13 @@ class OAuth2Controller extends BaseController
 
         // Send a rquest to the ID Provider to obtain a new set of tokens
         $response = $this->guzzleClient->post(
-            $this->config->get('oauth2client.oauth2_server_url') . '/oauth/token',
+            $this->config->get('oauth-token-validator.oauth2_server_url') . '/oauth/token',
             [
                 'form_params' => [
                     'grant_type'    => 'refresh_token',
                     'refresh_token' => $refreshTokenRow->refreshToken,
-                    'client_id'     => $this->config->get('oauth2client.client_id'),
-                    'client_secret' => $this->config->get('oauth2client.client_secret'),
+                    'client_id'     => $this->config->get('oauth-token-validator.client_id'),
+                    'client_secret' => $this->config->get('oauth-token-validator.client_secret'),
                 ],
             ]
         );
